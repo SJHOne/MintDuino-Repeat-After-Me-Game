@@ -8,7 +8,7 @@
 #define SPEAKERPIN 6
 #define LEDROOT 16
 
-#define WINSTATE 32   // number of steps to complete to win - this should be divisible by four
+#define WINSTATE 8   // number of steps to complete to win - this should be divisible by four
 
 int band = WINSTATE / 4;
 int turn = 0;
@@ -16,6 +16,9 @@ int input1 = LOW;
 int input2 = LOW;
 int input3 = LOW;
 int input4 = LOW;
+
+int beepdelay = 200;
+int pausedelay = 100;
 
 int randomArray[100]; //Intentionally long to store up to 100 inputs (doubtful anyone will get this far)
 int tonearray[4];
@@ -53,10 +56,10 @@ void ProcessSingleOutput(int value)
   value--;
   
   digitalWrite(LEDROOT + value, HIGH);
-  playTone(tonearray[value], 200); // Passes tone value and duration of the tone to the playTone function
-  delay(200);
+  playTone(tonearray[value], beepdelay); // Passes tone value and duration of the tone to the playTone function
+  delay(beepdelay);
   digitalWrite(LEDROOT + value, LOW);
-  delay(100);
+  delay(pausedelay);
  }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -189,24 +192,13 @@ void input()
   
   delay(500);
   
-  // Flashes lights for failure
-  for (int y=0; y<=5; y++)
-  {
-   digitalWrite(LEDROOT, HIGH);
-   digitalWrite(LEDROOT+1, HIGH);
-   digitalWrite(LEDROOT+2, HIGH);
-   digitalWrite(LEDROOT+3, HIGH);
-   delay(200);
-   digitalWrite(LEDROOT, LOW);
-   digitalWrite(LEDROOT+1, LOW);
-   digitalWrite(LEDROOT+2, LOW);
-   digitalWrite(LEDROOT+3, LOW);
-   delay(200);
-  }
+  FlashAll();
   
   delay(500);
   
   turn = -1; // Resets turn value so the game starts over without need for a reset button
+  beepdelay = 200;
+  pausedelay = 100;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -226,11 +218,34 @@ void win()
          delay(25);
       }
   }
-
+  
+  FlashAll();
+  
   turn = -1; // Resets turn value so the game starts over without need for a reset button
+  beepdelay = 200;
+  pausedelay = 100;
+  
   delay(1000);
 }
 
+void FlashAll()
+{
+  ///////////////////////////////////////////////////////////////////////////
+  // Flashes all lights
+  for (int y=0; y<=5; y++)
+  {
+   digitalWrite(LEDROOT, HIGH);
+   digitalWrite(LEDROOT+1, HIGH);
+   digitalWrite(LEDROOT+2, HIGH);
+   digitalWrite(LEDROOT+3, HIGH);
+   delay(200);
+   digitalWrite(LEDROOT, LOW);
+   digitalWrite(LEDROOT+1, LOW);
+   digitalWrite(LEDROOT+2, LOW);
+   digitalWrite(LEDROOT+3, LOW);
+   delay(200);
+  }
+}
 ///////////////////////////////////////////////////////////////////////////
 // Low C = 1915
 // D = 1700
@@ -251,6 +266,28 @@ void playTone(int tone, int duration)
   }
 }
 
+void increaseSpeed()
+{
+  if (turn == band)
+  {
+    beepdelay = 170;
+    pausedelay = 80;
+    return;
+  }
+  if (turn == band * 2)
+  {
+    beepdelay = 150;
+    pausedelay = 60;
+    return;
+  }
+
+  if (turn == band*3)
+  {
+    beepdelay = 120;
+    pausedelay = 40;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////
 void loop()
 {
@@ -258,6 +295,7 @@ void loop()
  {
    output();
    input();
+   increaseSpeed();
  }
  
  win();
