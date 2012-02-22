@@ -180,7 +180,7 @@ void input()
  
   for (int y=0; y<=5; y++)
    {
-     // Flashes light that should have been pressed
+     // Flashes score light
      digitalWrite(LEDROOT + scoreband, HIGH);
      playTone(tonearray[scoreband], 200);
      digitalWrite(LEDROOT + scoreband, LOW);
@@ -211,7 +211,6 @@ void win()
       for (int f = 0; f < 4; f++)
       {
     
-         // Flashes light that should have been pressed
          digitalWrite(LEDROOT + f, HIGH);
          playTone(tonearray[f], 100);
          digitalWrite(LEDROOT + f, LOW);
@@ -266,6 +265,8 @@ void playTone(int tone, int duration)
   }
 }
 
+///////////////////////////////////////////////////////////////////////////
+// Slowly cranks up the pressure
 void increaseSpeed()
 {
   if (turn == band)
