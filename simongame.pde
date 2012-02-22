@@ -8,7 +8,7 @@
 #define SPEAKERPIN 6
 #define LEDROOT 16
 
-#define WINSTATE 8   // number of steps to complete to win - this should be divisible by four
+#define WINSTATE 32   // number of steps to complete to win - this should be divisible by four
 
 int band = WINSTATE / 4;
 int turn = 0;
