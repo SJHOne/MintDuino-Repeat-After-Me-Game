@@ -254,7 +254,7 @@ void playTone(int tone, int duration)
 ///////////////////////////////////////////////////////////////////////////
 void loop()
 {
- for (int y = 0; y <= WINSTATE; y++)
+ for (int y = 0; y < WINSTATE; y++)
  {
    output();
    input();
