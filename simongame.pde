@@ -1,15 +1,17 @@
-/* Simon Says game by Robert Spann  2009           */
-/* http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1235696263  */
+/* Simon Says game by Robert Spann 2009 */
+/* http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1235696263 */
 
 /* Modified by Steve Hobley for MAKE:Projects 2012 */
 /* www.stephenhobley.com */
 
-#define SWITCHROOT 9 
-#define SPEAKERPIN 6 
-#define LEDROOT 16 
+#define SWITCHROOT 9
+#define SPEAKERPIN 6
+#define LEDROOT 16
 
+#define WINSTATE 32   // number of steps to complete to win - this should be divisible by four
+
+int band = WINSTATE / 4;
 int turn = 0;
-
 int input1 = LOW;
 int input2 = LOW;
 int input3 = LOW;
@@ -34,7 +36,7 @@ void setup() {
   {
     pinMode(LEDROOT + f, OUTPUT);
     pinMode(SWITCHROOT+ f, INPUT);
-    digitalWrite(SWITCHROOT+ f, HIGH);       // turn on pullup resistors
+    digitalWrite(SWITCHROOT+ f, HIGH); // turn on pullup resistors
     
     ProcessSingleOutput(f+1);
   }
@@ -59,23 +61,20 @@ void ProcessSingleOutput(int value)
 
 ///////////////////////////////////////////////////////////////////////////
 // function for generating the array to be matched by the player
-void output() 
-{ 
+void output()
+{
     
-   for (int y=turn; y <= turn; y++)
-   { 
-      Serial.println(""); 
+      Serial.println("");
       Serial.print("Turn: ");
-      Serial.println(y);
+      Serial.println(turn);
 
-      randomArray[y] = random(1, 5); // Assigning a random number (1-4) to the randomArray[y], y being the turn count
+      randomArray[turn] = random(1, 5); // Assigning a random number (1-4) to the randomArray[y], y being the turn count
 
       for (int x=0; x <= turn; x++)
       {
         Serial.print(randomArray[x]);
         ProcessSingleOutput(randomArray[x]);
       }
-    }
 }
   
 ///////////////////////////////////////////////////////////////////////////
@@ -88,19 +87,19 @@ void ProcessSingleInput(int value, int x)
   delay(50);
   Serial.print(" ");
   Serial.print(value+1);
-  if ((value+1) != randomArray[x]) 
-  { 
-    fail(randomArray[x]);                              
-  }                                      
+  if ((value+1) != randomArray[x])
+  {
+    fail(randomArray[x]);
+  }
 
-}  
+}
   
 ///////////////////////////////////////////////////////////////////////////
 // Function for allowing user input and checking input against the generated array
-void input() 
+void input()
 {
   for (int x=0; x <= turn;)
-  { 
+  {
     input1 = digitalRead(SWITCHROOT);
     input2 = digitalRead(SWITCHROOT+1);
     input3 = digitalRead(SWITCHROOT+2);
@@ -139,8 +138,8 @@ void input()
 
 ///////////////////////////////////////////////////////////////////////////
 // Function used if the player fails to match the sequence
- void fail(int correct) 
-{ 
+ void fail(int correct)
+{
    digitalWrite(LEDROOT, HIGH);
    digitalWrite(LEDROOT+1, HIGH);
    digitalWrite(LEDROOT+2, HIGH);
@@ -153,20 +152,46 @@ void input()
 
    correct--;
    
-   for (int y=0; y<=5; y++)
-   { 
+   for (int y=0; y<=3; y++)
+   {
      // Flashes light that should have been pressed
      digitalWrite(LEDROOT + correct, HIGH);
-     playTone(tonearray[correct], 200);
+     //playTone(tonearray[correct], 200);
+     delay(200);
      digitalWrite(LEDROOT + correct, LOW);
      delay(50);
   }
+  Serial.println("");
+  Serial.print("OOPS! Should have pressed ");
+  Serial.println(correct+1);
+
+  delay(500);
+  
+  // Now Score
+  // 1 - Beginner
+  // 2 - Amateur
+  // 3 - Expert
+  // 4 - Champ
+ 
+  int scoreband = turn / band;
+ 
+  for (int y=0; y<=5; y++)
+   {
+     // Flashes light that should have been pressed
+     digitalWrite(LEDROOT + scoreband, HIGH);
+     playTone(tonearray[scoreband], 200);
+     digitalWrite(LEDROOT + scoreband, LOW);
+     delay(50);
+  }
+  
+  Serial.print("You Score ");
+  Serial.println(scoreband+1);
   
   delay(500);
   
   // Flashes lights for failure
   for (int y=0; y<=5; y++)
-  { 
+  {
    digitalWrite(LEDROOT, HIGH);
    digitalWrite(LEDROOT+1, HIGH);
    digitalWrite(LEDROOT+2, HIGH);
@@ -185,6 +210,28 @@ void input()
 }
 
 ///////////////////////////////////////////////////////////////////////////
+void win()
+{
+  Serial.println("WIN!");
+  
+  for (int y=0; y < 4; y++)
+   {
+      for (int f = 0; f < 4; f++)
+      {
+    
+         // Flashes light that should have been pressed
+         digitalWrite(LEDROOT + f, HIGH);
+         playTone(tonearray[f], 100);
+         digitalWrite(LEDROOT + f, LOW);
+         delay(25);
+      }
+  }
+
+  turn = -1; // Resets turn value so the game starts over without need for a reset button
+  delay(1000);
+}
+
+///////////////////////////////////////////////////////////////////////////
 // Low C = 1915
 // D = 1700
 // E = 1519
@@ -193,9 +240,9 @@ void input()
 // A = 1136
 // B = 1014
 // High C = 956
-void playTone(int tone, int duration) 
+void playTone(int tone, int duration)
 {
-  for (long i = 0; i < duration * 1000L; i += tone * 2) 
+  for (long i = 0; i < duration * 1000L; i += tone * 2)
   {
     digitalWrite(SPEAKERPIN, HIGH);
     delayMicroseconds(tone);
@@ -205,12 +252,14 @@ void playTone(int tone, int duration)
 }
 
 ///////////////////////////////////////////////////////////////////////////
-void loop() 
-{ 
- for (int y=0; y<=1000; y++)
- { 
+void loop()
+{
+ for (int y = 0; y <= WINSTATE; y++)
+ {
    output();
    input();
  }
+ 
+ win();
+ 
 }
-  
