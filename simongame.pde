@@ -9,6 +9,7 @@
 #define LEDROOT 16
 
 #define WINSTATE 32   // number of steps to complete to win - this should be divisible by four
+#define RESPONSETIME 3000 // Time in ms we give the player to respond before calling fail()
 
 int band = WINSTATE / 4;
 int turn = 0;
@@ -16,6 +17,7 @@ int input1 = LOW;
 int input2 = LOW;
 int input3 = LOW;
 int input4 = LOW;
+int counter = 0;
 
 int beepdelay = 200;
 int pausedelay = 100;
@@ -107,6 +109,18 @@ void input()
     input2 = digitalRead(SWITCHROOT+1);
     input3 = digitalRead(SWITCHROOT+2);
     input4 = digitalRead(SWITCHROOT+3);
+
+    counter++;
+      
+    if (counter > RESPONSETIME)
+    {
+      Serial.println("TIMEOUT!");
+      fail(randomArray[x]);
+      counter = 0;
+      x++;
+    }
+    
+    delay(1);
 
     if (input1 == LOW)
     {
