@@ -1,4 +1,4 @@
-/* Simon Says game by Robert Spann 2009 */
+/* Original game by Robert Spann 2009 */
 /* http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1235696263 */
 
 /* Modified by Steve Hobley for MAKE:Projects 2012 */
